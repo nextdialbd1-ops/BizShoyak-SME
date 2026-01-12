@@ -1,0 +1,7 @@
+{
+  "name": "BizSahayok - SME Business Assistant",
+  "description": "A comprehensive AI-powered assistant for Bangladeshi SME owners featuring WhatsApp message classification, receipt scanning for cashflow tracking, and intelligent business analytics in Bangla.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
