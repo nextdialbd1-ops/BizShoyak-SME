@@ -64,7 +64,20 @@ export const getBusinessHealthAdvice = async (data: any) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Analyze this business data: ${JSON.stringify(data)}. Provide a concise business health score (0-100) and 2 sentences of advice in Bangla for a small shop owner. Return JSON.`,
+    contents: `As a business analyst for a Bangladeshi SME (${data.businessType || 'General'}), analyze this data:
+    
+    Data: ${JSON.stringify(data)}
+    
+    Task:
+    1. Calculate a business health score (0-100) considering cashflow status, stock efficiency, and customer message responsiveness/sentiment.
+    2. Provide 2-3 specific, actionable sentences of advice in Bangla.
+    
+    Guidelines:
+    - If cashflow is negative, warn about high expenses.
+    - If inventory has items at minStock, advise restocking.
+    - If there are unreplied or complaint messages, advise focusing on customer service.
+    
+    Return JSON only.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {

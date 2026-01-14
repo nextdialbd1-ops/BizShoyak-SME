@@ -7,7 +7,6 @@ import {
   ShoppingBag, 
   HeartPulse,
   ChevronRight,
-  // Fix: Added missing Bell import from lucide-react
   Bell
 } from 'lucide-react';
 import { 
@@ -36,19 +35,44 @@ const Dashboard: React.FC<DashboardProps> = ({ t, transactions, inventory, messa
 
   useEffect(() => {
     const fetchHealth = async () => {
+      // Skip analysis if no data is available to avoid wasted API calls during initialization
+      if (transactions.length === 0 && inventory.length === 0 && messages.length === 0) return;
+
       setLoadingHealth(true);
       try {
-        const advice = await getBusinessHealthAdvice({ transactions, inventory, profile });
+        // Prepare optimized data payload for AI
+        const analysisData = {
+          transactions: transactions.slice(0, 20).map(t => ({
+            type: t.type,
+            amount: t.amount,
+            category: t.category,
+            date: t.date
+          })),
+          inventory: inventory.map(i => ({
+            name: i.name,
+            quantity: i.quantity,
+            minStock: i.minStock
+          })),
+          messages: messages.slice(0, 10).map(m => ({
+            category: m.category,
+            status: m.status
+          })),
+          businessType: profile.type
+        };
+
+        const advice = await getBusinessHealthAdvice(analysisData);
         setHealth(advice);
       } catch (err) {
-        console.error(err);
+        console.error("Health analysis failed", err);
       } finally {
         setLoadingHealth(false);
       }
     };
-    fetchHealth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    // Debounce slightly or just run when data lengths change to capture initial seed data load
+    const timeoutId = setTimeout(fetchHealth, 500);
+    return () => clearTimeout(timeoutId);
+  }, [transactions.length, inventory.length, messages.length, profile.type]);
 
   const totalIncome = transactions
     .filter(tx => tx.type === TransactionType.INCOME)
